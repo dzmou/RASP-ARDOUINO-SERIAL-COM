@@ -314,6 +314,31 @@
       box-shadow: none;
     }
 
+    .btn-reset {
+      padding: 0 20px;
+      border-radius: 8px;
+      border: none;
+      background: var(--red);
+      color: white;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: transform 0.12s, box-shadow 0.12s, background 0.12s;
+    }
+
+    .btn-reset:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(192, 57, 43, 0.2);
+    }
+
+    .btn-reset:active {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+
     /* ── Status bar ── */
     .status-bar {
       display: flex;
