@@ -14,7 +14,7 @@ RASP-ARDOUINO-SERIAL-COM/
 └── Send_Commands_with_Serial_Communication/      # Part 2: Raspberry Pi -> Arduino
     ├── Ardouino/                                 # Arduino code for LED control
     │   └── sketch.txt                            
-    └── raspberry-arduino/                        # Flask Web API to handle commands
+    └── raspberry/                        # Flask Web API to handle commands
         ├── api.py                                # Main Flask server
         ├── serial_handler.py                     # Serial communication logic
         └── README.md                             # Sub-project specific documentation
@@ -47,14 +47,14 @@ This section demonstrates how to control hardware attached to an Arduino (like R
 
 ### How it works:
 - **Arduino (`Ardouino/sketch.txt`)**: Listens to the Serial port (`9600` baud rate). Based on the string command received (`white`/`blue`/`red`/`all`/`off`), it toggles digital pins `8`, `9`, and `10` HIGH or LOW to control LED states.
-- **Raspberry Pi (`raspberry-arduino/api.py`)**: Runs a **Flask Web API** server that accepts HTTP POST/GET requests. The routing logic captures the command and uses `serial_handler.py` to transmit it via the USB serial connection (`/dev/ttyUSB0` or `/dev/ttyACM0`) using `pyserial`. It also offers a web interface (`index.html`).
+- **Raspberry Pi (`raspberry/api.py`)**: Runs a **Flask Web API** server that accepts HTTP POST/GET requests. The routing logic captures the command and uses `serial_handler.py` to transmit it via the USB serial connection (`/dev/ttyUSB0` or `/dev/ttyACM0`) using `pyserial`. It also offers a web interface (`index.html`).
 
 ### Running it:
 1. Wire up your LEDs to pins 8, 9, and 10 of the Arduino and upload the sketch.
 2. Connect the Arduino to your Raspberry Pi via USB.
 3. On the Raspberry Pi, navigate to the Web API folder and run it:
    ```bash
-   cd Send_Commands_with_Serial_Communication/raspberry-arduino
+   cd Send_Commands_with_Serial_Communication/raspberry
    pip install -r requirements.txt
    python3 api.py
    ```
@@ -65,4 +65,4 @@ This section demonstrates how to control hardware attached to an Arduino (like R
         -d '{"command": "red"}'
    ```
 
-_For detailed documentation on the API endpoints and setup for Part 2, refer to [Send_Commands_with_Serial_Communication/raspberry-arduino/README.md](Send_Commands_with_Serial_Communication/raspberry-arduino/README.md)._
+_For detailed documentation on the API endpoints and setup for Part 2, refer to [Send_Commands_with_Serial_Communication/raspberry/README.md](Send_Commands_with_Serial_Communication/raspberry/README.md)._

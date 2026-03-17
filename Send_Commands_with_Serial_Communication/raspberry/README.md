@@ -3,7 +3,7 @@
 Control Arduino RGB LEDs via HTTP API from Raspberry Pi.
 ## Project Folders Tree
 ```
-raspberry-arduino/
+raspberry/
 ├── api.py
 ├── serial_handler.py
 ├── config.py
@@ -60,6 +60,8 @@ python3 api.py
 | red     | Red LED on, others off  |
 | all     | All LEDs on             |
 | off     | All LEDs off            |
+| test    | Test command            |
+|  ?      | any thing else          |
 
 ---
 
@@ -102,5 +104,5 @@ curl http://raspberrypi.local:5000/health
 ```
 crontab -e
 # Add:
-@reboot python3 /home/pi/raspberry-arduino/api.py &
+@reboot python3 /home/pi/raspberry/api.py &
 ```
