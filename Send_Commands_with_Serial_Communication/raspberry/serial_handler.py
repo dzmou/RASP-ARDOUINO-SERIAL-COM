@@ -40,17 +40,23 @@ def send_command(cmd):
     Returns:
         str: The response from the Arduino, or an empty string if no response.
     """
-    # Append newline, encode to bytes, and write to the serial port
-    ser.write((cmd + '\n').encode('utf-8'))
-    
-    # Wait briefly for the Arduino to process the command and reply
-    time.sleep(0.1)
-    
-    response = ""
-    # Check if there is data waiting to be read from the serial buffer
-    if ser.in_waiting:
-        # Read the line, decode it to string, and remove whitespace/newlines
-        response = ser.readline().decode('utf-8').strip() # strip() removes whitespace/newlines
+    if not is_connected():
+        return ""
+
+    try:
+        # Clear any old data from the input buffer so we don't read a previous response
+        ser.reset_input_buffer()
+        
+        # Append newline, encode to bytes, and write to the serial port
+        ser.write((cmd + '\n').encode('utf-8'))
+        
+        # Read the line, decode it to string, and remove whitespace/newlines.
+        # readline() will block until a newline is received or the timeout is reached.
+        response = ser.readline().decode('utf-8').strip()
+    except Exception as e:
+        print(f"Error sending command: {e}")
+        response = ""
+        
     return response
 
 def is_connected():
