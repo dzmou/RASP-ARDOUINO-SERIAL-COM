@@ -1,5 +1,5 @@
-from routes.api import api_bp
-from routes.web import web_bp
+from routes_rasp.api import api_bp
+from routes_rasp.web import web_bp
 
 def register_routes(app):
     app.register_blueprint(api_bp, url_prefix="/api")
