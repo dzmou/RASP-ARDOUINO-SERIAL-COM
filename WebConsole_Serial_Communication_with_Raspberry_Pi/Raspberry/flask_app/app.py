@@ -7,7 +7,7 @@ from config import Config
 from serial_handler import SerialHandler
 from csv_logger import CsvLogger
 from routes import register_routes
-  
+
 # ── App factory ───────────────────────────────────────────────
 def create_app():
     app = Flask(__name__)
