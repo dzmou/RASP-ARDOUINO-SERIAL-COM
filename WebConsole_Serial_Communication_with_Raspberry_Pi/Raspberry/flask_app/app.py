@@ -5,7 +5,7 @@ app.py — Flask entry point
 from flask import Flask, request
 from config import Config
 from serial_handler_rasp import SerialHandler
-from csv_logger import CsvLogger
+from csv_logger_rasp import CsvLogger
 from routes import register_routes
 
 # ── App factory ───────────────────────────────────────────────
