@@ -2,7 +2,7 @@ import os
 
 class Config:
     # ── Serial ────────────────────────────────────────────────
-    SERIAL_PORT     = os.environ.get("SERIAL_PORT", "/dev/ttyUSB0")
+    SERIAL_PORT     = os.environ.get("SERIAL_PORT", "/dev/ttyACM0")
     SERIAL_BAUD     = int(os.environ.get("SERIAL_BAUD", 9600))
     SERIAL_TIMEOUT  = 2          # seconds
     SERIAL_RESET_DELAY = 2       # seconds after open before sending
@@ -18,4 +18,4 @@ class Config:
     CSV_MAX_ROWS    = int(os.environ.get("CSV_MAX_ROWS", 10000))  # rotate after N rows
 
     # ── CORS ──────────────────────────────────────────────────
-    CORS_ORIGINS    = "*"
+    CORS_ORIGINS    = ["*"]
