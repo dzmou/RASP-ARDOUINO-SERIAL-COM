@@ -12,7 +12,7 @@ from datetime import datetime
 
 log = logging.getLogger(__name__)
 
-FIELDNAMES = ["timestamp", "mode", "ts_ms",
+FIELDNAMES = ["timestamp", "streaming", "ts_ms",
               "temp", "hum", "wind_spd", "wind_dir", "lux",
               "led_red", "led_green", "led_blue"]
 
@@ -33,7 +33,7 @@ class CsvLogger:
             leds = data.get("leds", {})
             self._writer.writerow({
                 "timestamp":  datetime.utcnow().isoformat(),
-                "mode":       data.get("mode", ""),
+                "streaming":  data.get("streaming", ""),
                 "ts_ms":      data.get("ts", ""),
                 "temp":       data.get("temp", ""),
                 "hum":        data.get("hum", ""),

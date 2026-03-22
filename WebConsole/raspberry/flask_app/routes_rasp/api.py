@@ -7,7 +7,6 @@ from flask import Blueprint, jsonify, request, current_app, send_from_directory
 
 api_bp = Blueprint("api", __name__)
 
-
 def serial():
     return current_app.serial
 
@@ -65,29 +64,29 @@ def led():
     return jsonify({"ok": ok, "command": cmd})
 
 
-# ── Mode switch ───────────────────────────────────────────────
-@api_bp.post("/mode")
-def set_mode():
-    body = request.get_json(force=True, silent=True) or {}
-    mode = body.get("mode", "").lower()
-    if mode not in ("default", "interactive", "hybrid"):
-        return jsonify({"ok": False, "error": "Invalid mode"}), 400
-    ok = serial().send(f"mode {mode}")
-    return jsonify({"ok": ok, "mode": mode})
+# -- Stream toggle -------------------------------------------
+@api_bp.post("/stream")
+def set_stream():
+    body  = request.get_json(force=True, silent=True) or {}
+    state = body.get("state", "").lower()
+    if state not in ("on", "off"):
+        return jsonify({"ok": False, "error": "State must be 'on' or 'off'"}), 400
+    ok = serial().send(f"stream {state}")
+    return jsonify({"ok": ok, "streaming": state == "on"})
 
 
-# ── Stream interval ───────────────────────────────────────────
+# -- Stream interval (seconds) --------------------------------
 @api_bp.post("/interval")
 def set_interval():
     body = request.get_json(force=True, silent=True) or {}
-    ms   = body.get("ms")
+    s    = body.get("s")
     try:
-        ms = int(ms)
-        assert 500 <= ms <= 60000
+        s = int(s)
+        assert 1 <= s <= 86400
     except Exception:
-        return jsonify({"ok": False, "error": "ms must be 500–60000"}), 400
-    ok = serial().send(f"interval {ms}")
-    return jsonify({"ok": ok, "interval_ms": ms})
+        return jsonify({"ok": False, "error": "s must be 1-86400 (seconds)"}), 400
+    ok = serial().send(f"interval {s}")
+    return jsonify({"ok": ok, "interval_s": s})
 
 
 # ── CSV: list files ───────────────────────────────────────────

@@ -1,4 +1,4 @@
-# 🔌 WebConsole_Serial_Communication_with_Raspberry_Pi
+# 🔌 WebConsole
 
 A full-stack serial communication project between a **Raspberry Pi** (Flask API + Web Console) and an **Arduino** (sensor station).
 
@@ -7,25 +7,23 @@ A full-stack serial communication project between a **Raspberry Pi** (Flask API 
 ## 📁 Project Structure
 
 ```
-WebConsole_Serial_Communication_with_Raspberry_Pi/
+WebConsole/
 ├── Arduino/
 │   ├── Arduino.ino                        # Main sketch
 │   ├── sensors.h                          # Sensor read functions
+│   ├── am2302.h                           # AM2302 / DHT22 driver
 │   ├── led_control.h                      # LED control functions
 │   └── README.md
 ├── Raspberry/
 │   ├── flask_app/
 │   │   ├── app.py                         # Flask entry point
 │   │   ├── config.py                      # Configuration
-│   │   ├── serial_handler.py              # Serial read/write thread
-│   │   ├── csv_logger.py                  # CSV data logger
-│   │   ├── routes/
+│   │   ├── serial_handler_rasp.py         # Serial read/write thread
+│   │   ├── csv_logger_rasp.py             # CSV data logger
+│   │   ├── routes_rasp/
 │   │   │   ├── __init__.py
 │   │   │   ├── api.py                     # REST API routes
 │   │   │   └── web.py                     # Web UI routes
-│   │   ├── static/
-│   │   │   ├── css/style.css
-│   │   │   └── js/console.js
 │   │   └── templates/
 │   │       └── index.html                 # Web console
 │   ├── requirements.txt

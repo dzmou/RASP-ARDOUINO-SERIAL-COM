@@ -1,4 +1,4 @@
-# 🍓 Raspberry Pi — WebConsole_Serial_Communication_with_Raspberry_Pi
+# 🍓 Raspberry Pi — WebConsole
 
 Flask API server + Web Console for the Arduino sensor station.
 
@@ -9,9 +9,9 @@ Raspberry/
 ├── flask_app/
 │   ├── app.py               # Entry point
 │   ├── config.py            # Port, baud, CSV settings
-│   ├── serial_handler.py    # Background serial thread
-│   ├── csv_logger.py        # Automatic CSV data logging
-│   ├── routes/
+│   ├── serial_handler_rasp.py    # Background serial thread
+│   ├── csv_logger_rasp.py        # Automatic CSV data logging
+│   ├── routes_rasp/
 │   │   ├── api.py           # REST endpoints
 │   │   └── web.py           # Serves web console
 │   └── templates/
@@ -56,8 +56,8 @@ Edit `flask_app/config.py` or set environment variables:
 | GET | `/api/log?n=100` | Last N raw serial lines |
 | POST | `/api/send` | Send raw command `{"command":"ping"}` |
 | POST | `/api/led` | LED control `{"color":"red","state":"on"}` |
-| POST | `/api/mode` | Switch mode `{"mode":"hybrid"}` |
-| POST | `/api/interval` | Set interval `{"ms":3000}` |
+| POST | `/api/stream` | Toggle stream `{"state":"on"}` |
+| POST | `/api/interval` | Set interval `{"s":5}` |
 | GET | `/api/csv` | List CSV data files |
 | GET | `/api/csv/<file>` | Download CSV file |
 
@@ -65,7 +65,7 @@ Edit `flask_app/config.py` or set environment variables:
 
 Sensor readings are auto-logged to `flask_app/data/readings_YYYY-MM-DD.csv`.
 
-Columns: `timestamp, mode, ts_ms, temp, hum, wind_spd, wind_dir, lux, led_red, led_green, led_blue`
+Columns: `timestamp, streaming, ts_ms, temp, hum, wind_spd, wind_dir, lux, led_red, led_green, led_blue`
 
 Files rotate daily and when they exceed `CSV_MAX_ROWS`.
 Download files via the web console or `GET /api/csv/<filename>`.
