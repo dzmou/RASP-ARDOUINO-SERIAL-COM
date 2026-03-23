@@ -42,7 +42,7 @@ void setup() {
   randomSeed(analogRead(A5));
 
   delay(500);   // Let serial settle after reset
-  Serial.println(F("[BOOT] WebConsole_Serial_Communication_with_Raspberry_Pi v1.0"));
+  Serial.println(F("[BOOT] RA WEB-CONSOLE v1.0"));
   Serial.println(F("[BOOT] Idle — streaming OFF by default"));
   Serial.print(F("[BOOT] Interval: "));
   Serial.print(streamInterval / 1000);

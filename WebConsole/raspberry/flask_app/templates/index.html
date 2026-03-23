@@ -1014,6 +1014,7 @@
     let t0 = Date.now();
     let pollTimer = null;
     let cmdHistory = [], histIdx = -1;
+    let lastSeenTs = 0;
 
     // ── Timestamps ────────────────────────────────────────────────
     function ts() { const d = new Date(); return [d.getHours(), d.getMinutes(), d.getSeconds()].map(n => String(n).padStart(2, '0')).join(':'); }
@@ -1054,22 +1055,23 @@
       if (data && data.ok !== undefined) {
         if (!data.ok) log('Send failed', 'err');
       }
-      // Refresh log after short delay
-      setTimeout(refreshLog, 300);
     }
 
     // ── Refresh RX log from server ────────────────────────────────
     async function refreshLog() {
-      const data = await apiGet('/api/log?n=5');
-      if (!data) return;
-      // New lines arrive at front; show any we haven't seen
-      // (Simple approach: just show the freshest line if it's new)
-      if (data.length > 0) {
-        const latest = data[0];
-        if (latest && latest.line && !latest.line.startsWith('{')) {
-          log(latest.line, 'rx');
+      const data = await apiGet('/api/log?n=50');
+      if (!data || !Array.isArray(data)) return;
+      
+      // Filter for items newer than lastSeenTs and reverse to show oldest first
+      const newItems = data.filter(item => item.ts > lastSeenTs).reverse();
+      
+      newItems.forEach(item => {
+        // Only log if not a JSON sensor packet (starts with {)
+        if (item.line && !item.line.startsWith('{')) {
+          log(item.line, 'rx');
         }
-      }
+        lastSeenTs = Math.max(lastSeenTs, item.ts);
+      });
     }
 
     // ── Poll latest sensor data ───────────────────────────────────
@@ -1221,7 +1223,7 @@
 
     // ── Boot sequence ─────────────────────────────────────────────
     (async () => {
-      log('WebConsole_Serial_Communication_with_Raspberry_Pi v1.0', 'info');
+      log('RA WEB-CONSOLE v1.0', 'info');
       log('Sensor streaming is OFF by default. Click STREAM ON to start.', 'sys');
       await new Promise(r => setTimeout(r, 300));
       await checkStatus();
@@ -1229,9 +1231,10 @@
       await pollData();
       await refreshCsvList();
 
-      // Auto-poll every 2.5s
-      setInterval(pollData, 2500);
-      setInterval(checkStatus, 10000);
+      // Auto-poll every 1.5s for sensors, 0.8s for logs
+      setInterval(pollData, 1500);
+      setInterval(refreshLog, 800);
+      setInterval(checkStatus, 5000);
       setInterval(refreshCsvList, 15000);
     })();
   </script>
