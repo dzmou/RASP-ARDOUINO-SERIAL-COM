@@ -7,6 +7,9 @@ from config import Config
 from serial_handler_rasp import SerialHandler
 from csv_logger_rasp import CsvLogger
 from routes_rasp import register_routes
+import socket
+import fcntl
+import struct
 
 # ── App factory ───────────────────────────────────────────────
 def create_app():
@@ -42,16 +45,35 @@ def create_app():
 
     return app
 
+def get_ip_address(ifname):
+    """
+    Directly queries the Linux kernel for the IP of a specific interface.
+    """
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # 0x8915 is the SIOCGIFADDR ioctl command to get the IP address
+        return socket.inet_ntoa(fcntl.ioctl(
+            s.fileno(),
+            0x8915,
+            struct.pack('256s', ifname[:15].encode('utf-8'))
+        )[20:24])
+    except IOError:
+        return "Not Found"
+
+def display_ip_addresses():
+    wlan_ip = get_ip_address('wlan0')
+    eth_ip = get_ip_address('eth0')
+
+    print("-" * 30)
+    print(f"Wi-Fi (wlan0): {wlan_ip}")
+    print(f"Ethernet (eth0): {eth_ip}")
+    print("-" * 30)
 
 if __name__ == "__main__":
+    print("\n" + "="*40)
+    print("RA-SERIAL WEB CONSOLE")
+    print("="*40)
+    display_ip_addresses()
     app = create_app()
     app.run(host=Config.HOST, port=Config.PORT, debug=Config.DEBUG)
-    # display All available IP addresses of the Raspberry Pi
-    import socket
-    hostname = socket.gethostname()
-    # get adresses array
-    addresses = socket.getaddrinfo(hostname, None)
-    print("Available IP addresses:")
-    for address in addresses:
-        print(f"  {address[4][0]} |")
     
