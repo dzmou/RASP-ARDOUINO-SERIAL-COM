@@ -15,7 +15,7 @@ def csv_log():
 
 
 # ── Status ────────────────────────────────────────────────────
-@api_bp.get("/status")
+@api_bp.route("/status", methods=["GET"])
 def status():
     return jsonify({
         "connected": serial().connected,
@@ -26,20 +26,20 @@ def status():
 
 
 # ── Latest sensor snapshot ────────────────────────────────────
-@api_bp.get("/data")
+@api_bp.route("/data", methods=["GET"])
 def get_data():
     return jsonify(serial().latest or {})
 
 
 # ── Raw RX log ────────────────────────────────────────────────
-@api_bp.get("/log")
+@api_bp.route("/log", methods=["GET"])
 def get_log():
     n = min(int(request.args.get("n", 100)), 200)
     return jsonify(list(serial().rx_log)[:n])
 
 
 # ── Send command ──────────────────────────────────────────────
-@api_bp.post("/send")
+@api_bp.route("/send", methods=["POST"])
 def send_cmd():
     body = request.get_json(force=True, silent=True) or {}
     cmd  = body.get("command", "").strip()
@@ -50,7 +50,7 @@ def send_cmd():
 
 
 # ── LED shortcut ──────────────────────────────────────────────
-@api_bp.post("/led")
+@api_bp.route("/led", methods=["POST"])
 def led():
     body  = request.get_json(force=True, silent=True) or {}
     color = body.get("color", "").lower()
@@ -59,13 +59,13 @@ def led():
         return jsonify({"ok": False, "error": "Invalid color"}), 400
     if state not in ("on", "off"):
         return jsonify({"ok": False, "error": "State must be on or off"}), 400
-    cmd = f"led {color} {state}"
+    cmd = f"led {color} {state}"# f: means formatted string, eg. led red on
     ok  = serial().send(cmd)
     return jsonify({"ok": ok, "command": cmd})
 
 
 # -- Stream toggle -------------------------------------------
-@api_bp.post("/stream")
+@api_bp.route("/stream", methods=["POST"])
 def set_stream():
     body  = request.get_json(force=True, silent=True) or {}
     state = body.get("state", "").lower()
@@ -76,7 +76,7 @@ def set_stream():
 
 
 # -- Stream interval (seconds) --------------------------------
-@api_bp.post("/interval")
+@api_bp.route("/interval", methods=["POST"])
 def set_interval():
     body = request.get_json(force=True, silent=True) or {}
     s    = body.get("s")
@@ -90,13 +90,13 @@ def set_interval():
 
 
 # ── CSV: list files ───────────────────────────────────────────
-@api_bp.get("/csv")
+@api_bp.route("/csv", methods=["GET"])
 def csv_list():
     return jsonify({"files": csv_log().list_files()})
 
 
 # ── CSV: download file ────────────────────────────────────────
-@api_bp.get("/csv/<filename>")
+@api_bp.route("/csv/<filename>", methods=["GET"])
 def csv_download(filename):
     # Safety: only allow our generated filenames
     if not filename.startswith("readings_") or not filename.endswith(".csv"):
