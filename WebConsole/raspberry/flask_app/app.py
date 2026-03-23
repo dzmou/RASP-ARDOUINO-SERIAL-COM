@@ -46,3 +46,12 @@ def create_app():
 if __name__ == "__main__":
     app = create_app()
     app.run(host=Config.HOST, port=Config.PORT, debug=Config.DEBUG)
+    # display All available IP addresses of the Raspberry Pi
+    import socket
+    hostname = socket.gethostname()
+    # get adresses array
+    addresses = socket.getaddrinfo(hostname, None)
+    print("Available IP addresses:")
+    for address in addresses:
+        print(f"  {address[4][0]} |")
+    
