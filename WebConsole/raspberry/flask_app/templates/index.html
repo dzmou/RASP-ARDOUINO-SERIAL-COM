@@ -523,7 +523,8 @@
     }
 
     .lmsg {
-      word-break: break-all
+      word-break: break-all;
+      white-space: pre-wrap
     }
 
     .lg.tx .lpfx,
@@ -1061,10 +1062,10 @@
     async function refreshLog() {
       const data = await apiGet('/api/log?n=50');
       if (!data || !Array.isArray(data)) return;
-      
+
       // Filter for items newer than lastSeenTs and reverse to show oldest first
       const newItems = data.filter(item => item.ts > lastSeenTs).reverse();
-      
+
       newItems.forEach(item => {
         // Only log if not a JSON sensor packet (starts with {)
         if (item.line && !item.line.startsWith('{')) {

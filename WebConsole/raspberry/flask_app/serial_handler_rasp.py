@@ -84,28 +84,63 @@ class SerialHandler:
         log.info("Serial connected")
 
     def _read_loop(self):
+        """
+        Continuously read from serial. 
+        Groups textual lines into single multi-line log entries but 
+        processes JSON sensor data immediately.
+        """
+        buffer = []
         while self._running and self._ser.is_open:
             try:
+                # Read a line (blocks for up to self.timeout seconds)
                 raw = self._ser.readline().decode("utf-8", errors="replace").strip()
+                
                 if not raw:
+                    # Timeout reached: if we have a text buffer, commit it now
+                    if buffer:
+                        self._commit_buffer(buffer)
+                        buffer = []
                     continue
 
-                self.rx_log.appendleft({"ts": time.time(), "line": raw})
-                log.debug(f"RX: {raw}")
-
-                # Try JSON parse (default / hybrid stream)
+                # Is it a JSON packet? (usually sensor data)
                 if raw.startswith("{"):
-                    try:
-                        data = json.loads(raw)
-                        self.latest = data
-                        for fn in self._on_data:
-                            try:
-                                fn(data)
-                            except Exception:
-                                pass
-                    except json.JSONDecodeError:
-                        pass  # malformed, keep as raw line
+                    # Flush any pending text before processing JSON
+                    if buffer:
+                        self._commit_buffer(buffer)
+                        buffer = []
+                    self._process_json(raw)
+                else:
+                    # It's a regular text line
+                    log.debug(f"RX (text): {raw}")
+                    buffer.append(raw)
+                    
+                    # If we see a block-end marker, flush immediately for responsiveness
+                    if "[END" in raw or "Unknown" in raw or "[PONG]" in raw:
+                        self._commit_buffer(buffer)
+                        buffer = []
 
             except serial.SerialException as e:
                 log.error(f"Read error: {e}")
                 break
+
+    def _commit_buffer(self, buffer):
+        """Joins lines and adds to the log as a single entry."""
+        if not buffer:
+            return
+        combined = "\n".join(buffer)
+        self.rx_log.appendleft({"ts": time.time(), "line": combined})
+        log.debug(f"RX (committed block):\n{combined}")
+
+    def _process_json(self, raw):
+        """Parses JSON data packets and triggers callbacks."""
+        try:
+            data = json.loads(raw)
+            self.latest = data
+            for fn in self._on_data:
+                try:
+                    fn(data)
+                except Exception as e:
+                    log.error(f"Callback error: {e}")
+        except json.JSONDecodeError:
+            # If not valid JSON after all, treat as text
+            self._commit_buffer([raw])
