@@ -154,7 +154,7 @@ class SerialGui:
         WAKEUP_CHAR = b'1'  # Any numeric key (0-9) works
         ESC_CHAR = b'\x1b'  # ESC character to return to sleep/log mode
 
-        if not self.is_connected:
+        if self.is_connected:
             try:
                 self._update_display("Initiating wake-up sequence (duration: 12 seconds)...")
             
@@ -182,7 +182,7 @@ class SerialGui:
     def sleep_datahog(self):
         # Sending ESC returns the device to sleep/log mode
         ESC_CHAR = b'\x1b'  # ESC character to return to sleep/log mode
-        if not self.is_connected:
+        if self.is_connected:
             try:
                 self.ser.write(ESC_CHAR)
                 self._update_display("ESC sent: Device returning to sleep/logging mode.")
