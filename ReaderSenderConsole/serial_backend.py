@@ -62,7 +62,7 @@ class SerialBackend:
                     if self.ser.in_waiting > 0:
                         line = self.ser.readline().decode('utf-8', errors='replace').rstrip()
                         if line:
-                            self.callback(f"DEVICE: {line}")
+                            self.callback(f"\t: {line}")
                 except Exception as e:
                     self.callback(f"SYSTEM ERROR: {e}")
                     self.running = False
