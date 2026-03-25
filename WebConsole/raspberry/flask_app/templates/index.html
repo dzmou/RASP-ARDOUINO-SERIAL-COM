@@ -968,6 +968,16 @@
           <div class="port-row"><span class="pk">STREAMING</span><span class="pv warn" id="pv-stream">OFF</span>
           </div>
           <div class="port-row"><span class="pk">INTERVAL</span><span class="pv" id="pv-interval">2000 ms</span></div>
+          <div class="port-row"><span class="pk">DELIM</span><span class="pv" id="pv-delim">\n</span></div>
+        </div>
+
+        <div>
+          <div class="clabel" style="margin-bottom:7px">LINE DELIMITER (BREAKLINE)</div>
+          <div class="interval-row">
+            <input class="interval-inp" id="delim-inp" type="text" value="\n" maxlength="10" style="width:60px;text-align:center">
+            <button class="btn-sm" id="delim-set">SET</button>
+          </div>
+          <div class="csub">Used to group multi-line answers into one packet.</div>
         </div>
 
         <div>
@@ -1016,6 +1026,7 @@
     let pollTimer = null;
     let cmdHistory = [], histIdx = -1;
     let lastSeenTs = 0;
+    let currentDelim = '\n';
 
     // ── Timestamps ────────────────────────────────────────────────
     function ts() { const d = new Date(); return [d.getHours(), d.getMinutes(), d.getSeconds()].map(n => String(n).padStart(2, '0')).join(':'); }
@@ -1023,6 +1034,10 @@
 
     // ── Terminal log ──────────────────────────────────────────────
     function log(msg, type = 'sys') {
+      // Split by custom delimiter if set and present
+      if (currentDelim !== '\n' && msg.includes(currentDelim)) {
+        msg = msg.split(currentDelim).join('\n');
+      }
       const pfx = { tx: 'TX ▶', rx: 'RX ◀', err: '!! ', sys: '// ', info: '## ', data: '~~ ' };
       const el = document.createElement('div');
       el.className = `lg ${type}`;
@@ -1219,6 +1234,20 @@
         document.getElementById('pv-interval').textContent = v + ' s';
       } else {
         log('Interval must be 1s – 86400s (24h)', 'err');
+      }
+    });
+
+    document.getElementById('delim-set').addEventListener('click', () => {
+      let v = document.getElementById('delim-inp').value;
+      if (!v) return;
+      if (v === '\\n' || v === 'newline') {
+        currentDelim = '\n';
+        document.getElementById('pv-delim').textContent = '\\n';
+        send('delim \\n');
+      } else {
+        currentDelim = v[0];
+        document.getElementById('pv-delim').textContent = currentDelim;
+        send('delim ' + currentDelim);
       }
     });
 

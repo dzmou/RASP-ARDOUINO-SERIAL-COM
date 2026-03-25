@@ -13,25 +13,39 @@ unsigned long streamInterval = 2000;       // ms between stream packets (default
 unsigned long lastStream     = 0;
 String        cmdBuffer      = "";
 LedState      leds;
+char          lineDelim      = '\n';   // Default breakline char
+
+// ── Delimiter Helper ──────────────────────────────────────────
+void printlnDelim(const __FlashStringHelper* s, bool isLast = false) {
+  Serial.print(s);
+  if (lineDelim == '\n' || isLast) Serial.println();
+  else Serial.print(lineDelim);
+}
+void printlnDelim(const String &s, bool isLast = false) {
+  Serial.print(s);
+  if (lineDelim == '\n' || isLast) Serial.println();
+  else Serial.print(lineDelim);
+}
 
 // ── Interactive Menu ──────────────────────────────────────────
 void printMenu() {
-  Serial.println(F("[MENU]"));
-  Serial.println(F("  read              - Read all sensors"));
-  Serial.println(F("  read temp         - Temperature only"));
-  Serial.println(F("  read hum          - Humidity only"));
-  Serial.println(F("  read wind         - Wind speed & direction"));
-  Serial.println(F("  read lux          - Luminosity only"));
-  Serial.println(F("  led <color> on/off- Control LED (red/green/blue)"));
-  Serial.println(F("  led all on/off    - All LEDs on or off"));
-  Serial.println(F("  interval <s>      - Set stream interval in seconds (1-60)"));
-  Serial.println(F("  status            - Device info & current state"));
-  Serial.println(F("  stream on         - Start continuous sensor streaming"));
-  Serial.println(F("  stream off        - Stop continuous sensor streaming"));
-  Serial.println(F("  reset             - Soft reset device"));
-  Serial.println(F("  ping              - Health check"));
-  Serial.println(F("  menu              - Show this menu"));
-  Serial.println(F("[END MENU]"));
+  printlnDelim(F("[MENU]"));
+  printlnDelim(F("  read              - Read all sensors"));
+  printlnDelim(F("  read temp         - Temperature only"));
+  printlnDelim(F("  read hum          - Humidity only"));
+  printlnDelim(F("  read wind         - Wind speed & direction"));
+  printlnDelim(F("  read lux          - Luminosity only"));
+  printlnDelim(F("  led <color> on/off- Control LED (red/green/blue)"));
+  printlnDelim(F("  led all on/off    - All LEDs on or off"));
+  printlnDelim(F("  interval <s>      - Set stream interval in seconds (1-60)"));
+  printlnDelim(F("  delim <char>      - Set breakline char (e.g. '|' or '\\n')"));
+  printlnDelim(F("  status            - Device info & current state"));
+  printlnDelim(F("  stream on         - Start continuous sensor streaming"));
+  printlnDelim(F("  stream off        - Stop continuous sensor streaming"));
+  printlnDelim(F("  reset             - Soft reset device"));
+  printlnDelim(F("  ping              - Health check"));
+  printlnDelim(F("  menu              - Show this menu"));
+  printlnDelim(F("[END MENU]"), true);
 }
 
 // ── Setup ─────────────────────────────────────────────────────
@@ -134,11 +148,12 @@ void handleCommand(String cmd) {
   }
 
   if (cmd == "status") {
-    Serial.print(F("[STATUS] streaming=")); Serial.println(isStreaming ? "ON" : "OFF");
-    Serial.print(F("[STATUS] interval="));  Serial.print(streamInterval / 1000); Serial.println(F("s"));
-    Serial.print(F("[STATUS] uptime="));    Serial.print(millis()/1000);  Serial.println(F("s"));
-    Serial.print(F("[STATUS] fw=v1.0 port=9600"));
-    Serial.println();
+    Serial.print(F("[STATUS] streaming=")); printlnDelim(isStreaming ? "ON" : "OFF");
+    Serial.print(F("[STATUS] interval="));  Serial.print(streamInterval / 1000); printlnDelim(F("s"));
+    Serial.print(F("[STATUS] uptime="));    Serial.print(millis()/1000);  printlnDelim(F("s"));
+    Serial.print(F("[STATUS] fw=v1.0 delim='"));
+    if (lineDelim == '\n') Serial.print(F("\\n")); else Serial.print(lineDelim);
+    printlnDelim(F("'"), true);
     printLedStatus();
     return;
   }
@@ -147,23 +162,24 @@ void handleCommand(String cmd) {
     updateSimulatedSensors();
     printAllSensors();
     printLedStatus();
+    Serial.println(); // Final flush
     return;
   }
   if (cmd == "read temp") {
-    Serial.print(F("[DATA] temp=")); Serial.println(readTemp(), 1);
+    Serial.print(F("[DATA] temp=")); printlnDelim(String(readTemp(), 1), true);
     return;
   }
   if (cmd == "read hum") {
-    Serial.print(F("[DATA] hum=")); Serial.println(readHumidity(), 1);
+    Serial.print(F("[DATA] hum=")); printlnDelim(String(readHumidity(), 1), true);
     return;
   }
   if (cmd == "read wind") {
     Serial.print(F("[DATA] wind_spd=")); Serial.print(readWindSpeed(), 1);
-    Serial.print(F(" wind_dir="));       Serial.println(readWindDir());
+    Serial.print(F(" wind_dir="));       printlnDelim(readWindDir(), true);
     return;
   }
   if (cmd == "read lux") {
-    Serial.print(F("[DATA] lux=")); Serial.println(readLux());
+    Serial.print(F("[DATA] lux=")); printlnDelim(String(readLux()), true);
     return;
   }
 
@@ -201,6 +217,21 @@ void handleCommand(String cmd) {
       Serial.print(val);
       Serial.println(F(" s"));
     }
+    return;
+  }
+
+  // ── Delimiter: delim <char> ──
+  if (cmd.startsWith("delim ")) {
+    String arg = cmd.substring(6);
+    arg.trim();
+    if (arg == "\\n" || arg == "newline") {
+      lineDelim = '\n';
+    } else if (arg.length() > 0) {
+      lineDelim = arg[0];
+    }
+    Serial.print(F("[CFG] Delimiter set to '"));
+    if (lineDelim == '\n') Serial.print(F("\\n")); else Serial.print(lineDelim);
+    Serial.println(F("'"));
     return;
   }
 
