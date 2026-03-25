@@ -163,7 +163,8 @@ class SerialGui:
                 start_time = time.time()
                 # Send numeric key repeatedly for slightly over the 10s wake-up period
                 while time.time() - start_time < 12:
-                    self.backend.write_raw(WAKEUP_CHAR)
+                    self._update_display(f"YOU: {WAKEUP_CHAR}")
+                    self.backend.write(WAKEUP_CHAR)
                     time.sleep(1)  # Interval between attempts
                     
                     # Check if device responded with the Main Menu
