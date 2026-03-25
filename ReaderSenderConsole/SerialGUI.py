@@ -9,18 +9,22 @@ class SerialGui:
         self.ser = serial_port
         self.root.title("Serial Monitor")
 
+        # 0. UI Responsiveness setup
+        root.grid_rowconfigure(0, weight=1)      # Row 0 (display) expands
+        root.grid_columnconfigure(0, weight=1)   # Column 0 (entry box) expands
+
         # 1. UI Setup: Scrolled Text area for reading
         self.display = scrolledtext.ScrolledText(root, state='disabled', height=15, width=50)
-        self.display.grid(row=0, column=0, padx=10, pady=10, columnspan=2)
+        self.display.grid(row=0, column=0, padx=10, pady=10, columnspan=2, sticky='nsew')
 
         # 2. UI Setup: Entry box for sending
-        self.input_field = tk.Entry(root, width=40)
-        self.input_field.grid(row=1, column=0, padx=10, pady=10)
+        self.input_field = tk.Entry(root)
+        self.input_field.grid(row=1, column=0, padx=10, pady=10, sticky='ew')
         self.input_field.bind("<Return>", self.send_command) # Press Enter to send
 
         # 3. UI Setup: Send Button
         self.send_button = tk.Button(root, text="Send", command=self.send_command)
-        self.send_button.grid(row=1, column=1, padx=10, pady=10)
+        self.send_button.grid(row=1, column=1, padx=10, pady=10, sticky='e')
 
         # Start the background reading thread
         self.read_thread = threading.Thread(target=self.listen_serial, daemon=True)
